@@ -7,3 +7,6 @@
 *.vcd
 *.gtkw
 *.nl.v
+dependencies/
+mgmt_core_wrapper/
+caravel/

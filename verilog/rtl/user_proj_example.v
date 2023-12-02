@@ -110,6 +110,7 @@ module user_proj_example #(
         .rdata(rdata),
         .wdata(wbs_dat_i[BITS-1:0]),
         .wstrb(wstrb),
+        .addr(wbs_adr_i),
         .la_write(la_write),
         .la_input(la_data_in[61:62-BITS]),
         .count(count)
@@ -124,6 +125,7 @@ module counter #(
     input reset,
     input valid,
     input [3:0] wstrb,
+    input [31:0] addr,
     input [BITS-1:0] wdata,
     input [BITS-1:0] la_write,
     input [BITS-1:0] la_input,
@@ -132,22 +134,20 @@ module counter #(
     output reg [BITS-1:0] count
 );
 
+reg[7:0] mem[511:0];
+
     always @(posedge clk) begin
         if (reset) begin
             count <= 0;
             ready <= 0;
         end else begin
             ready <= 1'b0;
-            if (~|la_write) begin
-                count <= count + 1;
-            end
             if (valid && !ready) begin
                 ready <= 1'b1;
-                rdata <= count;
-                if (wstrb[0]) count[7:0]   <= wdata[7:0];
-                if (wstrb[1]) count[15:8]  <= wdata[15:8];
-            end else if (|la_write) begin
-                count <= la_write & la_input;
+                if (wstrb[0])
+                    mem[addr[8:0]][7:0] <= wdata[7:0];
+                else
+                    rdata <= mem[addr[8:0]];
             end
         end
     end

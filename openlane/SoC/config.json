@@ -1,0 +1,39 @@
+{
+	"PDK": "gf180mcuD",
+	"STD_CELL_LIBRARY": "gf180mcu_fd_sc_mcu7t5v0",
+	"DESIGN_NAME": "SoC",
+	"VERILOG_FILES": [
+		"dir::../../verilog/rtl/core.v"
+	],
+	"DESIGN_IS_CORE": 0,
+	"CLOCK_PORT": "clk",
+	"CLOCK_NET": "core.clk",
+	"CLOCK_PERIOD": "48.0",
+	"FP_SIZING": "absolute",
+	"DIE_AREA": "0 0 2940 2370",
+	"FP_PIN_ORDER_CFG": "dir::pin_order.cfg",
+	"PL_BASIC_PLACEMENT": 0,
+	"PL_TARGET_DENSITY": 0.52,
+	"FP_CORE_UTIL": 45,
+	"MAX_FANOUT_CONSTRAINT": 6,
+	"RT_MAX_LAYER": "Metal4",
+	"VDD_NETS": [
+		"vdd"
+	],
+	"GND_NETS": [
+		"vss"
+	],
+    "BASE_SDC_FILE": "dir::base_user_proj_example.sdc",
+    "GLB_RESIZER_TIMING_OPTIMIZATIONS" : 0,
+    "GLB_RESIZER_DESIGN_OPTIMIZATIONS" : 0,
+    "PL_RESIZER_DESIGN_OPTIMIZATIONS" : 0,
+    "PL_RESIZER_TIMING_OPTIMIZATIONS" : 0,
+	"RUN_HEURISTIC_DIODE_INSERTION": 0,
+	"GRT_REPAIR_ANTENNAS" : 0,
+	"GRT_ALLOW_CONGESTION" : 1,
+    "ROUTING_CORES" : 24,
+	"RUN_CVC": 1,
+	"QUIT_ON_LINTER_ERRORS": 0,
+    "SYNTH_STRATEGY" : "AREA 2",
+    "DIODE_INSERTION_STRATEGY" : 0
+}

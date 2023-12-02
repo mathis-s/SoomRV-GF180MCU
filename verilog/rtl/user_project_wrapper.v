@@ -29,6 +29,7 @@
  *-------------------------------------------------------------
  */
 
+
 module user_project_wrapper #(
     parameter BITS = 32
 ) (
@@ -70,41 +71,293 @@ module user_project_wrapper #(
 /* User project is instantiated  here   */
 /*--------------------------------------*/
 
-user_proj_example mprj (
-`ifdef USE_POWER_PINS
-	.vdd(vdd),	// User area 1 1.8V power
-	.vss(vss),	// User area 1 digital ground
-`endif
 
-    .wb_clk_i(wb_clk_i),
-    .wb_rst_i(wb_rst_i),
+wire OUT_powerOff;
+wire OUT_reboot;
+wire OUT_busOE;
+wire [32 - 1:0] OUT_bus;
+wire [32 - 1:0] IN_bus;
+wire IN_busReady;
+wire OUT_busValid;
+wire [0:0] OUT_DC_ce;
+wire [0:0] OUT_DC_we;
+wire [8:0] OUT_DC_addr;
+wire [31:0] OUT_DC_data;
+wire [3:0] OUT_DC_wm;
+wire [31:0] IN_DC_data;
+wire OUT_IC_ce;
+wire OUT_IC_we;
+wire [8:0] OUT_IC_addr;
+wire [31:0] OUT_IC_data;
+wire [0:0] OUT_IC_wm;
+wire [31:0] IN_IC_data;
+wire OUT_DCT_ce;
+wire OUT_DCT_we;
+wire [6:0] OUT_DCT_addr;
+wire [21:0] OUT_DCT_data;
+wire [0:0] OUT_DCT_wm;
+wire [21:0] IN_DCT_data;
+wire OUT_ICT_ce;
+wire OUT_ICT_we;
+wire [6:0] OUT_ICT_addr;
+wire [21:0] OUT_ICT_data;
+wire [0:0] OUT_ICT_wm;
+wire [21:0] IN_ICT_data;
+wire [39:0] OUT_dbg;
+wire [15:0] OUT_dbgMemC;
 
-    // MGMT SoC Wishbone Slave
+wire clk = wb_clk_i;
+wire rst = wb_rst_i;
 
-    .wbs_cyc_i(wbs_cyc_i),
-    .wbs_stb_i(wbs_stb_i),
-    .wbs_we_i(wbs_we_i),
-    .wbs_sel_i(wbs_sel_i),
-    .wbs_adr_i(wbs_adr_i),
-    .wbs_dat_i(wbs_dat_i),
-    .wbs_ack_o(wbs_ack_o),
-    .wbs_dat_o(wbs_dat_o),
+assign io_oeb = ~{{32{OUT_busOE}}, 6'b111110};
+assign io_out[0] = 1'b0;
+//assign io_out[1] = ;
+//assign io_out[2] = ;
+//assign io_out[3] = ;
+assign io_out[4] = wb_clk_i;
+assign io_out[5] = OUT_busValid;
+assign io_out[37:6] = OUT_bus;
 
-    // Logic Analyzer
+assign IN_bus = io_in[37:6];
+assign IN_busReady = io_in[0];
 
-    .la_data_in(la_data_in),
-    .la_data_out(la_data_out),
-    .la_oenb (la_oenb),
-
-    // IO Pads
-
-    .io_in ({io_in[37:30],io_in[7:0]}),
-    .io_out({io_out[37:30],io_out[7:0]}),
-    .io_oeb({io_oeb[37:30],io_oeb[7:0]}),
-
-    // IRQ
-    .irq(user_irq)
+SoC soc
+(
+    .clk(clk),
+    .rst(rst),
+    .en(1'b1),
+    
+    .OUT_powerOff(OUT_powerOff),
+    .OUT_reboot(OUT_reboot),
+    .OUT_busOE(OUT_busOE),
+    .OUT_bus(OUT_bus),
+    .IN_bus(IN_bus),
+    .IN_busReady(IN_busReady),
+    .OUT_busValid(OUT_busValid),
+    .OUT_DC_ce(OUT_DC_ce),
+    .OUT_DC_we(OUT_DC_we),
+    .OUT_DC_addr(OUT_DC_addr),
+    .OUT_DC_data(OUT_DC_data),
+    .OUT_DC_wm(OUT_DC_wm),
+    .IN_DC_data(IN_DC_data),
+    .OUT_IC_ce(OUT_IC_ce),
+    .OUT_IC_we(OUT_IC_we),
+    .OUT_IC_addr(OUT_IC_addr),
+    .OUT_IC_data(OUT_IC_data),
+    .OUT_IC_wm(OUT_IC_wm),
+    .IN_IC_data(IN_IC_data),
+    .OUT_DCT_ce(OUT_DCT_ce),
+    .OUT_DCT_we(OUT_DCT_we),
+    .OUT_DCT_addr(OUT_DCT_addr),
+    .OUT_DCT_data(OUT_DCT_data),
+    .OUT_DCT_wm(OUT_DCT_wm),
+    .IN_DCT_data(IN_DCT_data),
+    .OUT_ICT_ce(OUT_ICT_ce),
+    .OUT_ICT_we(OUT_ICT_we),
+    .OUT_ICT_addr(OUT_ICT_addr),
+    .OUT_ICT_data(OUT_ICT_data),
+    .OUT_ICT_wm(OUT_ICT_wm),
+    .IN_ICT_data(IN_ICT_data),
+    .OUT_dbg(OUT_dbg),
+    .OUT_dbgMemC(OUT_dbgMemC)
 );
+
+(*keep*) gf180_ram_512x8_wrapper dcache0
+(
+    .CLK(clk),
+    .CEN(OUT_DC_ce),
+    .GWEN(OUT_DC_we),
+    .WEN({8{~OUT_DC_wm[0]}}),
+    .A(OUT_DC_addr),
+    .D(OUT_DC_data[7:0]),
+    .Q(IN_DC_data[7:0])
+
+`ifdef USE_POWER_PINS
+    ,.VDD(vdd)
+	,.VSS(vss)
+`endif
+);
+
+(*keep*) gf180_ram_512x8_wrapper dcache1
+(
+    .CLK(clk),
+    .CEN(OUT_DC_ce),
+    .GWEN(OUT_DC_we),
+    .WEN({8{~OUT_DC_wm[1]}}),
+    .A(OUT_DC_addr),
+    .D(OUT_DC_data[15:8]),
+    .Q(IN_DC_data[15:8])
+
+//`ifdef USE_POWER_PINS
+//    ,.VDD(vdd)
+//	,.VSS(vss)
+//`endif
+);
+
+(*keep*) gf180_ram_512x8_wrapper dcache2
+(
+    .CLK(clk),
+    .CEN(OUT_DC_ce),
+    .GWEN(OUT_DC_we),
+    .WEN({8{~OUT_DC_wm[2]}}),
+    .A(OUT_DC_addr),
+    .D(OUT_DC_data[23:16]),
+    .Q(IN_DC_data[23:16])
+
+//`ifdef USE_POWER_PINS
+//    ,.VDD(vdd)
+//	,.VSS(vss)
+//`endif
+);
+
+(*keep*) gf180_ram_512x8_wrapper dcache3
+(
+    .CLK(clk),
+    .CEN(OUT_DC_ce),
+    .GWEN(OUT_DC_we),
+    .WEN({8{~OUT_DC_wm[3]}}),
+    .A(OUT_DC_addr),
+    .D(OUT_DC_data[31:24]),
+    .Q(IN_DC_data[31:24])
+
+//`ifdef USE_POWER_PINS
+//    ,.VDD(vdd)
+//	,.VSS(vss)
+//`endif
+);
+
+(*keep*) gf180_ram_512x8_wrapper icache0
+(
+    .CLK(clk),
+    .CEN(OUT_IC_ce),
+    .GWEN(OUT_IC_we),
+    .WEN({8{~OUT_IC_wm[0]}}),
+    .A(OUT_IC_addr),
+    .D(OUT_IC_data[7:0]),
+    .Q(IN_IC_data[7:0])
+
+//`ifdef USE_POWER_PINS
+//    ,.VDD(vdd)
+//	,.VSS(vss)
+//`endif
+);
+
+(*keep*) gf180_ram_512x8_wrapper icache1
+(
+    .CLK(clk),
+    .CEN(OUT_IC_ce),
+    .GWEN(OUT_IC_we),
+    .WEN({8{~OUT_IC_wm[0]}}),
+    .A(OUT_IC_addr),
+    .D(OUT_IC_data[15:8]),
+    .Q(IN_IC_data[15:8])
+
+//`ifdef USE_POWER_PINS
+//    ,.VDD(vdd)
+//	,.VSS(vss)
+//`endif
+);
+
+(*keep*) gf180_ram_512x8_wrapper icache2
+(
+    .CLK(clk), .CEN(rst),
+    .GWEN(OUT_IC_ce),
+    .WEN({8{~OUT_IC_wm[0]}}),
+    .A(OUT_IC_addr),
+    .D(OUT_IC_data[23:16]),
+    .Q(IN_IC_data[23:16])
+
+//`ifdef USE_POWER_PINS
+//    ,.VDD(vdd)
+//	,.VSS(vss)
+//`endif
+);
+
+(*keep*) gf180_ram_512x8_wrapper icache3
+(
+    .CLK(clk),
+    .CEN(rst),
+    .GWEN(OUT_IC_ce),
+    .WEN({8{~OUT_IC_wm[0]}}),
+    .A(OUT_IC_addr),
+    .D(OUT_IC_data[31:24]),
+    .Q(IN_IC_data[31:24])
+
+//`ifdef USE_POWER_PINS
+//    ,.VDD(vdd)
+//	,.VSS(vss)
+//`endif
+);
+
+
+(*keep*) gf180_ram_512x8_wrapper dct0
+(
+    .CLK(clk),
+    .CEN(OUT_DCT_ce),
+    .GWEN(OUT_DCT_we),
+    .WEN(8'h00),
+    .A({2'b0, OUT_DCT_addr}),
+    .D(OUT_DCT_data[7:0]),
+    .Q(IN_DCT_data[7:0])
+
+//`ifdef USE_POWER_PINS
+//    ,.VDD(vdd)
+//	,.VSS(vss)
+//`endif
+);
+
+(*keep*) gf180_ram_512x8_wrapper dct1
+(
+    .CLK(clk),
+    .CEN(OUT_DCT_ce),
+    .GWEN(OUT_DCT_we),
+    .WEN(8'h00),
+    .A({2'b0, OUT_DCT_addr}),
+    .D(OUT_DCT_data[15:8]),
+    .Q(IN_DCT_data[15:8])
+
+//`ifdef USE_POWER_PINS
+//    ,.VDD(vdd)
+//	,.VSS(vss)
+//`endif
+);
+// We only map 64 MiB of cacheable RAM in the core,
+// so we the upper part of the cache tags is constant.
+assign IN_DCT_data[21:16] = 6'b100000;
+
+
+(*keep*) gf180_ram_512x8_wrapper ict0
+(
+    .CLK(clk),
+    .CEN(OUT_ICT_ce),
+    .GWEN(OUT_ICT_we),
+    .WEN(8'h00),
+    .A({2'b0, OUT_ICT_addr}),
+    .D(OUT_ICT_data[7:0]),
+    .Q(IN_ICT_data[7:0])
+
+//`ifdef USE_POWER_PINS
+//    ,.VDD(vdd)
+//	,.VSS(vss)
+//`endif
+);
+
+(*keep*) gf180_ram_512x8_wrapper ict1
+(
+    .CLK(clk),
+    .CEN(OUT_ICT_ce),
+    .GWEN(OUT_ICT_we),
+    .WEN(8'h00),
+    .A({2'b0, OUT_ICT_addr}),
+    .D(OUT_ICT_data[15:8]),
+    .Q(IN_ICT_data[15:8])
+
+//`ifdef USE_POWER_PINS
+//    ,.VDD(vdd)
+//	,.VSS(vss)
+//`endif
+);
+assign IN_ICT_data[21:16] = 6'b100000;
 
 endmodule	// user_project_wrapper
 

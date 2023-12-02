@@ -1,10 +1,15 @@
-# Caravel User Project
+# SoomRV-GF180MCU
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![UPRJ_CI](https://github.com/efabless/caravel_project_example/actions/workflows/user_project_ci.yml/badge.svg)](https://github.com/efabless/caravel_project_example/actions/workflows/user_project_ci.yml) [![Caravel Build](https://github.com/efabless/caravel_project_example/actions/workflows/caravel_build.yml/badge.svg)](https://github.com/efabless/caravel_project_example/actions/workflows/caravel_build.yml)
+The Linux-capable, out-of-order SoomRV rv32i core on GF180MCU.
 
-| :exclamation: Important Note            |
-|-----------------------------------------|
-
-## Please fill in your project documentation in this README.md file 
-
-Refer to [README](docs/source/index.rst) for this sample project documentation. 
+## Features
+ - 2-wide superscalar out-of-order execution
+    - Ports: 2x Integer ALU, 1x LD/ST AGU
+ - Instruction and Data Caches
+    - 2 KiB each
+    - direct-mapped VIPT
+ - 64MiB of external (cacheable) memory and MMIO
+    - Access via simple bidirectional 32-bit bus on IO pins
+ - Implements RISC-V Privileged Spec
+    - sv32 virtual memory
+    - boots regular Linux kernel

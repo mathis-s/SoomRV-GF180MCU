@@ -4,12 +4,13 @@
 	"DESIGN_NAME": "user_proj_example",
 	"VERILOG_FILES": [
 		"dir::../../verilog/rtl/defines.v",
-		"dir::../../verilog/rtl/user_proj_example.v"
+		"dir::../../verilog/rtl/user_proj_example.v",
+		"dir::../../verilog/rtl/core.v"
 	],
 	"DESIGN_IS_CORE": 0,
 	"CLOCK_PORT": "wb_clk_i",
 	"CLOCK_NET": "counter.clk",
-	"CLOCK_PERIOD": "24.0",
+	"CLOCK_PERIOD": "48.0",
 	"FP_SIZING": "absolute",
 	"DIE_AREA": "0 0 2800 1760",
 	"FP_PIN_ORDER_CFG": "dir::pin_order.cfg",
